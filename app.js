@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var todosRouter = require("./routes/todos");
 
 var app = express();
 
@@ -21,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use("/todos",todosRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -38,20 +40,5 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.get("/todos", (err, req, res) => {
-  //todo一覧返す
-})
-
-app.post("/todos", (err, req, res) => {
-  //todo追加する
-})
-
-app.put("/todos", (err, req, res) => {
-  //特定rowidのtodo更新する
-})
-
-app.delete("todos", (err, req, res) => {
-  //特定rowidのtodo削除する
-})
 
 module.exports = app;
