@@ -27,9 +27,6 @@ router.post('/', (req, res) => {
 router.put('/:rowid', (req, res) => {
   const rowid = req.params.rowid;
   const todo = req.body.todo;
-  console.log(rowid, todo, req.rowid)
-  console.log(req.body)
-  console.log(req.params)
   db.run('UPDATE todos SET todo = ? WHERE rowid = ?', todo, rowid, (err) => {
     res.json({ message: 'success' });
   });
