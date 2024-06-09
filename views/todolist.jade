@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  #api-data 
+    script.
+      // APIを呼び出すJavaScriptコード
+      async function fetchData() {
+        try {
+          const response = await fetch('/todos'); // Expressアプリのエンドポイントに合わせて変更
+          const data = await response.json();
+          document.querySelector('#api-data').textContent = JSON.stringify(data);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      fetchData();

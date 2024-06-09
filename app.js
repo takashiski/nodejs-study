@@ -7,6 +7,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var todosRouter = require("./routes/todos");
+var todolistRouter = require("./routes/todolist");
 
 var app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/todos",todosRouter);
+app.use("/todolist",todolistRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -40,5 +42,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
+// app.get("/todolist",(req,res)=>{
+//   this.render("todolist",{title:"Todo List"})
+// });
 module.exports = app;
