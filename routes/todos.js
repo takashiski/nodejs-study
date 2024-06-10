@@ -37,9 +37,8 @@ router.put('/:rowid', async(req, res) => {
     //トランザクション開始
     await db_run("BEGIN TRANSACTION");
     //存在確認
-    let count = await db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
-    console.log(count);
-    if (count.exist == 0) {
+    let data = await db_all("SELECT rowid FROM todos WHERE rowid=?", rowid);
+    if (data.length == 0) {
       throw new Error("No such rowid");
     }
     //更新操作
@@ -65,8 +64,8 @@ router.put('/', async(req, res) => {
     //トランザクション開始
     await db_run("BEGIN TRANSACTION");
     //存在確認
-    let count = await db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
-    if (count.exist == 0) {
+    let data = await db_all("SELECT rowid FROM todos WHERE rowid=?", rowid);
+    if (data.length == 0) {
       throw new Error("No such rowid");
     }
     //更新操作
@@ -90,14 +89,12 @@ router.delete('/:rowid', async (req, res) => {
   try {
     //トランザクション開始
     await db_run("BEGIN TRANSACTION");
-    //移動元テーブルに該当データが存在するか確認する
-    let count = await db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
-    if (count.exist == 0) {
-      throw new Error("No such rowid");
-    }
-    console.log(count);
     //移動元テーブルから該当データを取得する
     let data = await db_get("SELECT todo FROM todos WHERE rowid=?", rowid);
+    //長さ確認して存在チェック
+    if (data.length == 0) {
+      throw new Error("No such rowid");
+    }
     console.log(data);
     //移動元テーブルから該当データを削除する
     await db_run("DELETE FROM todos WHERE rowid=?", rowid);
