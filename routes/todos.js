@@ -37,7 +37,8 @@ router.put('/:rowid', async(req, res) => {
     //トランザクション開始
     await db_run("BEGIN TRANSACTION");
     //存在確認
-    let count = db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
+    let count = await db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
+    console.log(count);
     if (count.exist == 0) {
       throw new Error("No such rowid");
     }
@@ -49,7 +50,7 @@ router.put('/:rowid', async(req, res) => {
   }
   catch (e) {
     await db_run("ROLLBACK");
-    res.status(400).json(e);
+    res.status(400).json({ "Error": { "message": e.message } });
     console.error("transaction failed", e);
   }
 });
@@ -64,7 +65,7 @@ router.put('/', async(req, res) => {
     //トランザクション開始
     await db_run("BEGIN TRANSACTION");
     //存在確認
-    let count = db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
+    let count = await db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
     if (count.exist == 0) {
       throw new Error("No such rowid");
     }
@@ -76,7 +77,7 @@ router.put('/', async(req, res) => {
   }
   catch (e) {
     await db_run("ROLLBACK");
-    res.status(400).json(e);
+    res.status(400).json(e.message);
     console.error("transaction failed", e);
   }
 });
