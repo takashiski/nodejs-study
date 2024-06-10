@@ -7,7 +7,7 @@ todosテーブル
 rowid NUMBER？（SQLiteによって自動割り振り）
 todo TEXT
 **/
-// db.run("CREATE TABLE todos (todo TEXT)");
+// db.run("CREATE TABLE dones (todo TEXT)");
 
 // db.serialize(() => {
 //     const stmt = db.prepare("INSERT INTO todos(todo) VALUES(?)");
@@ -28,15 +28,15 @@ todo TEXT
 //     }
 // })
 
-//更新
-db.run("BEGIN TRANSACTION");
-db.run("UPDATE todos SET todo=? WHERE rowid=10", "あたらしいやること");
-db.run("COMMIT TRANSACTION")
-//show table
-db.each("SELECT rowid AS id, todo FROM todos", (err, row) => {
-    if(err){console.error(err)}
-    console.log(`${row.id} ${row.todo}`);
-})
+// //更新
+// db.run("BEGIN TRANSACTION");
+// db.run("UPDATE todos SET todo=? WHERE rowid=10", "あたらしいやること");
+// db.run("COMMIT TRANSACTION")
+// //show table
+// db.each("SELECT rowid AS id, todo FROM todos", (err, row) => {
+//     if(err){console.error(err)}
+//     console.log(`${row.id} ${row.todo}`);
+// })
 
 
 db.close();

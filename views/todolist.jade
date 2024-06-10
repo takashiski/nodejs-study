@@ -2,17 +2,32 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
-  #api-data 
-    script.
-      // APIを呼び出すJavaScriptコード
-      async function fetchData() {
-        try {
-          const response = await fetch('/todos'); // Expressアプリのエンドポイントに合わせて変更
-          const data = await response.json();
-          document.querySelector('#api-data').textContent = JSON.stringify(data);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      fetchData();
+  table 
+    tr
+      th 番号
+      th TODO
+    - each todo in todos
+      tr 
+        td #{todo.rowid}
+        td #{todo.todo}
+  table 
+    tr
+      th 番号
+      th DONE
+    - each done in dones
+      tr 
+        td #{done.rowid}
+        td #{done.todo}
+  //- #api-data 
+  //-   script.
+  //-     // APIを呼び出すJavaScriptコード
+  //-     async function fetchData() {
+  //-       try {
+  //-         const response = await fetch('/todos'); // Expressアプリのエンドポイントに合わせて変更
+  //-         const data = await response.json();
+  //-         document.querySelector('#api-data').textContent = JSON.stringify(data);
+  //-       } catch (error) {
+  //-         console.error(error);
+  //-       }
+  //-     }
+  //-     fetchData();
