@@ -1,5 +1,9 @@
 # express + sqliteを使ったアプリケーション開発の練習
 
+* 2テーブル
+  * todos
+  * dones
+
 ## 必須事項
 
 * expressを使う
