@@ -2,6 +2,28 @@ extends layout
 
 block content
   h1= title
+  form(role="form" target="_self")
+    div 
+      label(for="todo") TODO
+      input#todo.form-control(type="text" name="todo" placeholder="TODOを入力してください")
+    button.btn.btn-primary(type="submit" onclick="resisterTodo()") 登録
+      script.
+        //TODOを登録するJavaScriptコード
+        //todosテーブルにTODOを登録する
+        async function resisterTodo() {
+          const response = await fetch('/todos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ todo: document.querySelector('#todo').value })
+          });
+          const data = await response.json();
+          console.log(data);
+          todos.append(data);
+          alert('TODOを登録しました');
+        }
+  h2 TODO一覧
   table 
     tr
       th 番号
