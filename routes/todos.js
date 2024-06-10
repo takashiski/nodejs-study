@@ -6,6 +6,12 @@ const router = express.Router();
 const sqlite3 = require('sqlite3');
 const db = new sqlite3.Database('database.sqlite3');
 
+const util = require("util");
+
+const db_run = util.promisify(db.run.bind(db));
+const db_get = util.promisify(db.get.bind(db));
+const db_all = util.promisify(db.all.bind(db));
+
 //GET /todos
 router.get('/', (req, res) => {
   db.all('SELECT rowid, todo FROM todos', (err, rows) => {
@@ -94,126 +100,36 @@ router.put('/', (req, res) => {
 
 //DELETE /todos/:rowid
 //todosからdonesに移動する
-router.delete('/:rowid', (req, res) => {
+router.delete('/:rowid', async (req, res) => {
   const rowid = req.params.rowid;
   let todo = "";
-  //トランザクション開始
   try {
-    db.run("BEGIN TRANSACTION",() => { 
-      //移動元から該当データ取得
-      db.all("SELECT rowid,todo FROM todos WHERE rowid=?", rowid, (err, result) => {
-        if (err) {
-          // if (err || result.length == 0) {
-          console.error(err);
-          throw new Error(errorMessage);
-        }
-        else if(result.length==0){
-          const errorMessage = "not found such a rowid"
-          throw new Error(errorMessage);
-        }
-        else {
-          todo = result[0].todo;
-          console.log(result)
-          //該当データを元テーブルから削除
-          db.run('DELETE FROM todos WHERE rowid = ?', rowid, (err) => {
-            if (err) {
-              const errorMessage = "canoot delete the rowid"
-              throw new Error(errorMessage);
-            }
-            else {
-              //該当データを移動先テーブルに追加
-              db.run("INSERT INTO dones(todo) VALUES(?)", todo, (err) => {
-                if (err) {
-                  console.error(err);
-                  const errorMessage = "cannot add todo"
-                  throw new Error(errorMessage);
-                }
-                //トランザクション終了
-                db.run("COMMIT", (err) => {
-                  if (err) {
-                    console.error(err)
-                    throw new Error(err);
-                  }
-                  else {
-                    res.json({ message: 'success' });
-                  }
-                });
-              });
-            }
-          });
-        }
-      });
-    });
+    //トランザクション開始
+    await db_run("BEGIN TRANSACTION");
+    //移動元テーブルに該当データが存在するか確認する
+    let count = await db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
+    if (count.exist == 0) {
+      throw new Error("No such rowid");
+    }
+    console.log(count);
+    //移動元テーブルから該当データを取得する
+    let data = await db_get("SELECT todo FROM todos WHERE rowid=?", rowid);
+    console.log(data);
+    //移動元テーブルから該当データを削除する
+    await db_run("DELETE FROM todos WHERE rowid=?", rowid);
+    //移動先テーブルに該当データを挿入する
+    await db_run("INSERT INTO dones(todo) VALUES(?)", data.todo);
+    //トランザクション終了
+    await db_run("COMMIT");
+    res.status(200).json(`success to move ${rowid}:data.todo`);
   }
   catch (e) {
-    db.run("ROLLBACK", () => {
-      res.status(400).json(e.message);
-    });
+    await db_run("ROLLBACK");
+    console.error(e);
+    res.status(400).json(e);
+    console.error("transaction failed");
   }
 
 });
-
-
-
-// //DELETE /todos/:rowid
-// //todosからdonesに移動する
-// router.delete('/:rowid', (req, res) => {
-//   const rowid = req.params.rowid;
-//   let todo = "";
-//   //トランザクション開始
-//   db.run("BEGIN TRANSACTION", () => {
-//     //移動元から該当データ取得
-//     db.run("SELECT rowid,todo,done FROM todos WHERE rowid=?", rowid, (err, result) => {
-//       if (err || result == []) {
-//         db.run("ROLLBACK", () => {
-//           db.close();
-//           const errorMessage = "not found such a rowid"
-//           res.status(400).json({ message: errorMessage });
-//           // return errorMessage;
-//           return new Error(errorMessage);
-//         });
-//       }
-//       else {
-//         todo = result;
-//         //該当データを元テーブルから削除
-//         db.run('DELETE FROM todos WHERE rowid = ?', rowid, (err) => {
-//           if (err) {
-//             db.run("ROLLBACK", (err) => {
-//               db.close();
-//               const errorMessage = "canoot delete the rowid"
-//               res.status(400).json({ message: errorMessage });
-//               return errorMessage;
-//             });
-//           }
-//           else {
-//             //該当データを移動先テーブルに追加
-//             db.run("INSERT INTO dones(todo) VALUES(?)", todo, (err) => {
-//               if (err) {
-//                 db.run("ROLLBACK", (err) => {
-//                   db.close();
-//                   const errorMessage = "cannot add todo"
-//                   res.status(400).json({ message: errorMessage });
-//                   return errorMessage;
-//                 });
-//               }
-//               //トランザクション終了
-//               db.run("COMMIT", (err) => {
-//                 db.close()
-//                 if (err) {
-//                   console.error(err)
-//                 }
-//                 else {
-//                   res.json({ message: 'success' });
-//                 }
-//               });
-//             });
-            
-//           }
-//         });
-//       }
-//     });
-    
-//   });
-// });
 
 module.exports = router;
