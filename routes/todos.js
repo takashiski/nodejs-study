@@ -30,72 +30,55 @@ router.post('/', (req, res) => {
 });
 
 //PUT /todos/:rowid
-router.put('/:rowid', (req, res) => {
+router.put('/:rowid', async(req, res) => {
   const rowid = req.params.rowid;
   const todo = req.body.todo;
-  db.serialize(() => { 
-    db.run("BEGIN TRANSACTION");
-    db.run('UPDATE todos SET todo = ? WHERE rowid = ?', todo, rowid, (err, result) => {
-      if (err) {
-        db.run("ROLLBACK", (err) => {
-          if (err) {
-            return console.error(err.message);
-          }
-          else {
-            console.log("rollbacked");
-          }
-        });
-        return console.log(err.message);
-      }
-    });
-    db.run("COMMIT", (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(400).json("something wrong for updating");
-      }
-      else {
-        console.log(result);
-        res.status(200).json(`update ${rowid}'s TODO`);
-      }
-    });
-    
-  });
+  try {
+    //トランザクション開始
+    await db_run("BEGIN TRANSACTION");
+    //存在確認
+    let count = db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
+    if (count.exist == 0) {
+      throw new Error("No such rowid");
+    }
+    //更新操作
+    await db_run("UPDATE todos SET todo=? WHERE rowid=?", todo, rowid);
+    //トランザクション終了
+    await db_run("COMMIT");
+    res.status(200).json(`update ${rowid}'s TODO`);
+  }
+  catch (e) {
+    await db_run("ROLLBACK");
+    res.status(400).json(e);
+    console.error("transaction failed", e);
+  }
 });
 
 
 //PUT /todos/
-router.put('/', (req, res) => {
+router.put('/', async(req, res) => {
   const rowid = req.body.rowid;
   const todo = req.body.todo;
-  db.serialize(() => {
-    db.run("BEGIN TRANSACTION",()=>{console.log("begin transaction")});
-    db.run('UPDATE todos SET todo = ? WHERE rowid = ?', todo, rowid, (err, result) => {
-      if (err) {
-        console.error(err);
-        db.run("ROLLBACK", (err) => {
-          if (err) {
-            return console.error(err.message);
-          }
-          else {
-            console.log("rollbacked");
-          }
-        });
-        return console.log(err.message);
-      }
-      console.log(result);
-    });
-    db.run("COMMIT", (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(400).json("something wrong for updating");
-      }
-      else {
-        console.log(result);
-        res.status(200).json(`update ${rowid}'s TODO`);
-      }
-    });
 
-  });
+  try {
+    //トランザクション開始
+    await db_run("BEGIN TRANSACTION");
+    //存在確認
+    let count = db_get("SELECT EXISTS(SELECT rowid FROM todos WHERE rowid=?) as exist", rowid);
+    if (count.exist == 0) {
+      throw new Error("No such rowid");
+    }
+    //更新操作
+    await db_run("UPDATE todos SET todo=? WHERE rowid=?", todo, rowid);
+    //トランザクション終了
+    await db_run("COMMIT");
+    res.status(200).json(`update ${rowid}'s TODO`);
+  }
+  catch (e) {
+    await db_run("ROLLBACK");
+    res.status(400).json(e);
+    console.error("transaction failed", e);
+  }
 });
 
 //DELETE /todos/:rowid
