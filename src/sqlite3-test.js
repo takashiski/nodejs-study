@@ -7,6 +7,9 @@ todosテーブル
 rowid NUMBER？（SQLiteによって自動割り振り）
 todo TEXT
 **/
+
+// db.run("DELETE FROM todos");
+// db.run("DELETE FROM dones");
 // db.run("CREATE TABLE dones (todo TEXT)");
 
 // db.serialize(() => {
