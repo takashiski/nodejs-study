@@ -21,8 +21,14 @@ router.get('/', function (req, res, next) {
         res.render('todolist', { todos: todos,dones:dones });
       })
     })
-    // db.close();
   })
+});
+
+router.post("/", (req, res,next) => {
+  const todo = req.body.todo;
+  db.run("INSERT INTO todos(todo) VALUES(?)", todo, (err) => {
+    res.redirect("/todolist");
+  });
 });
 
 module.exports = router;
