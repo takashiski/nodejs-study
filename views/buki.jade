@@ -1,0 +1,72 @@
+//- ブキ登録画面のJadeファイル
+//- ブキ名、メインウェポン名、サブウェポン名、スペシャルウェポン名を入力するフォームを表示
+//- メインウェポン、サブウェポン、スペシャルウェポンは{id, name}の形式の配列で取得したものをselect要素で表示
+//- ブキ名はテキスト、メインウェポン、サブウェポン、スペシャルウェポンはidを送信する
+extends layout
+
+block content
+  h1= title
+  form(role="form" method="post" action="/buki")
+    div
+      h3 ブキ名
+      select#buki.form-control(name="bukiName")
+        - each bukiName in bukiNames
+          option(value=bukiName.id)= bukiName.id+bukiName.name 
+      input#buki.form-control(type="text" name="bukiNameFree" placeholder="ブキ名を入力してください")
+    div
+      div.float-left 
+        h3 メインウェポン
+        select#main.form-control(name="main" size="15" autofocus)
+          - each main in mains
+            case main.type_id
+              //- シューター
+              when 1 
+              //- ローラー
+              when 2 
+              //- チャージャー
+              when 3 
+              //- スロッシャー
+              when 4 
+              //- スピナー
+              when 5
+              //- マニューバー
+              when 6
+              //- シェルター
+              when 7
+              //- ブラスター
+              when 8
+              //- フデ
+              when 9
+                - break
+              //- ストリンガー
+              when 10
+              //- ワイパー
+              when 11
+              default
+                option(value=main.id)= main.id+main.name
+      div.float-left
+        h3 サブウェポン
+        select#sub.form-control(name="sub" size="15")
+          - each sub in subs
+            option(value=sub.id)= sub.id+sub.name
+      div
+        h3 スペシャルウェポン
+        select#special.form-control(name="special" size="15")
+          - each special in specials
+            option(value=special.id)= special.id+special.name
+    br
+    button.btn.btn-primary(type="submit") 登録
+
+  h2 ブキ一覧
+  table 
+    tr
+      th ブキ名
+      th メインウェポン
+      th サブウェポン
+      th スペシャルウェポン
+    - each buki in bukis
+      tr 
+        td= buki.name 
+        td= buki.main
+        td= buki.sub
+        td= buki.special

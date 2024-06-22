@@ -6,3 +6,22 @@ body {
 a {
   color: #00B7FF;
 }
+div{
+  margin: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+div.float-left {
+  margin: 10px;
+  float: left;
+  background-color: #d0d0d0;
+}
+button{
+  margin: 10px;
+  padding: 10px;
+  height:100px;
+  width:500px;
+}
+#buki{
+  font-size: 30px;
+}
