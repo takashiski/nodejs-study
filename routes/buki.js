@@ -10,36 +10,21 @@ const db = new sqlite3.Database("buki.sqlite3");
 const dbRun = promisify(db.run.bind(db));
 const dbAll = promisify(db.all.bind(db));
 
-const bukiNames = await dbAll("SELECT * FROM weapon_name");
+const bukiNames = await dbAll("SELECT id,name FROM weapon");
 const mains = await dbAll("SELECT * FROM main_weapon");
 const subs = await dbAll("SELECT * FROM sub_weapon");
 const specials = await dbAll("SELECT * FROM special_weapon");
 
 
-console.log(bukiNames);
 /* GET home page. */
 router.get('/', async function (req, res, next) {
 
   //weaponテーブルから全データを取得してbukisを更新
-  const bukis = await dbAll("SELECT * FROM weapon");
+  const bukis = await dbAll("SELECT weapon.id, weapon.name,main_weapon.name AS main,sub_weapon.name AS sub,special_weapon.name AS special FROM weapon JOIN main_weapon ON weapon.main_weapon_id = main_weapon.id JOIN sub_weapon ON weapon.sub_weapon_id = sub_weapon.id JOIN special_weapon ON weapon.special_weapon_id = special_weapon.id");
   console.log("GET bukis");
-  const addedBukiNames = await dbAll("SELECT weapon_name.id, weapon_name.name AS name, main_weapon.name AS main, sub_weapon.name AS sub, special_weapon.name AS special FROM weapon_name INNER JOIN weapon ON weapon.weapon_name_id = weapon_name.id JOIN main_weapon ON weapon.main_weapon_id = main_weapon.id JOIN sub_weapon ON weapon.sub_weapon_id = sub_weapon.id JOIN special_weapon ON weapon.special_weapon_id = special_weapon.id");
-  console.log("GET addedBukiNames");
-  console.log("addedlength", addedBukiNames.length);
-  const removeIndexs = [];
-  for (const [index, bukiName] of bukiNames.entries()) {
-    for (const addedBukiName of addedBukiNames) {
-      if (bukiName.id === addedBukiName.id) {
-        console.log("remove:", addedBukiName.id, addedBukiName.name);
-        removeIndexs.unshift(index);
-      }
-    }
-  }
-  removeIndexs.forEach((index) => {
-    bukiNames.splice(index, 1);
-  });
+
   console.log("Filter bukiNames");
-  res.render('buki', { bukis: addedBukiNames, bukiNames, mains, subs, specials });
+  res.render('buki', { bukis, bukiNames, mains, subs, specials });
 });
 
 router.post("/", async (req, res, next) => {
@@ -50,7 +35,7 @@ router.post("/", async (req, res, next) => {
   if (req.body.bukiNameFree !== '') {
     const name = req.body.bukiNameFree;
     await dbRun("INSERT INTO weapon_name (name) VALUES (?)", name);
-    bukiNameId = await dbAll("SELECT id FROM weapon_name WHERE name = ?", name);
+    bukiNameId = (await dbAll("SELECT id FROM weapon_name WHERE name = ?", name))[0].id;
   }
   else {
     bukiNameId = req.body.bukiName;
