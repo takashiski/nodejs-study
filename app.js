@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 
 import indexRouter from './routes/index.js';
 import bukiRouter from './routes/buki.js';
+import bukiFilterRouter from './routes/bukiFilter.js';
 
 var app = express();
 
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/buki', bukiRouter);
+app.use('/bukiFilter', bukiFilterRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

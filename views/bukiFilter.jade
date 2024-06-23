@@ -1,0 +1,100 @@
+//- ブキを絞り込んで表示するためのフォーム
+block content 
+
+div
+    h1 ブキ絞り込み
+    p ブキを絞り込んで表示するためのフォームです。絞り込んだブキをコピーして他の場所に貼り付けることができます。
+    p メインウェポン、サブウェポン、スペシャルウェポンの種類を選択してください。
+    p 選択した条件に合致するブキが表示されます。
+    p 表示されたブキをコピーするボタンを押すと、クリップボードにコピーされます。
+    p クリップボードにコピーしたテキストを他の場所に貼り付けることで、絞り込んだブキを共有することができます。
+
+div
+    button#copyListButton クリップボードにコピー
+    br
+    textarea#filterdBukis(name="" size="50" rows="10" readonly) 
+//- mainWeaponTypeで絞り込むフォー
+div
+    h3 メインウェポンの種類
+    select#mainWeaponType.form-control(name="mainWeaponType" size="10" multiple)
+        option(value="") 全て
+        option(value="1") シューター
+        option(value="2") ローラー
+        option(value="3") チャージャー
+        option(value="4") スロッシャー
+        option(value="5") スピナー
+        option(value="6") マニューバー
+        option(value="7") シェルター
+        option(value="8") ブラスター
+        option(value="9") フデ
+        option(value="10") ストリンガー
+        option(value="11") ワイパー
+
+div.float-left
+    h3 サブウェポンの種類
+    select#subWeapon(name="subWeapon", size="10" multiple)
+        option(value="") 全て
+        each subWeapon in subWeaponList
+            option(value=subWeapon.id)= subWeapon.name
+div.float-left
+    h3 スペシャルウェポンの種類
+    select#specialWeapon(name="specialWeapon", size="10" multiple)
+        option(value="") 全て
+        each specialWeapon in specialWeaponList
+            option(value=specialWeapon.id)= specialWeapon.name
+
+
+
+script(type='module').
+    import BukiFilter from '/js/BukiFilter.js';
+    const bukiList = !{JSON.stringify(bukiList)};
+    const bukiFilter = new BukiFilter(bukiList);
+    const filteredBukisText = document.querySelector('#filterdBukis');
+    filteredBukisText.value = bukiFilter.filteredList.map(buki=>buki.name).join('\n');
+    // メインウェポンの種類を選択したときの処理
+    const mainWeaponType = document.querySelector('#mainWeaponType');
+    mainWeaponType.addEventListener('change', (event) => {
+        const selectedValues = [];
+        for(const option of mainWeaponType.options) {
+            if(option.selected) {
+                selectedValues.push(option.value);
+            }
+        }    
+        bukiFilter.mainWeaponTypeIds=selectedValues;
+        bukiFilter.filter();
+        filteredBukisText.value = bukiFilter.filteredList.map(buki=>buki.name).join('\n');
+    });
+    // サブウェポンの種類を選択したときの処理
+    const subWeapon = document.querySelector('#subWeapon');
+    subWeapon.addEventListener('change', (event) => {
+        const selectedValues = [];
+        for(const option of subWeapon.options) {
+            if(option.selected) {
+                selectedValues.push(option.value);
+            }
+        }
+        bukiFilter.subWeaponIds=selectedValues;
+        bukiFilter.filter();
+        filteredBukisText.value = bukiFilter.filteredList.map(buki=>buki.name).join('\n');
+    });
+    // スペシャルウェポンの種類を選択したときの処理
+    const specialWeapon = document.querySelector('#specialWeapon');
+    specialWeapon.addEventListener('change', (event) => {
+        const selectedValues = [];
+        for(const option of specialWeapon.options) {
+            if(option.selected) {
+                selectedValues.push(option.value);
+            }
+        }
+        bukiFilter.specialWeaponIds=selectedValues;
+        bukiFilter.filter();
+        filteredBukisText.value = bukiFilter.filteredList.map(buki=>buki.name).join('\n');
+    });
+    // コピーするボタンを押したときの処理
+    const copyListButton = document.querySelector('#copyListButton');
+    copyListButton.addEventListener('click', (event) => {
+        filteredBukisText.select();
+        document.execCommand('copy');
+    });
+
+
